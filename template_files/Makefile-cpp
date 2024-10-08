@@ -21,7 +21,7 @@ extension.wasm: gen src/extension_impl.cpp src/extension.cpp
 gen:
 	$(WIT_BINDGEN) c -e build/extension.wit --out-dir src/
 	mv src/extension.c src/extension.cpp
-	$(SED) -i 's/ret->ptr = canonical_abi_realloc(NULL, 0, 1, ret->len);/ret->ptr = reinterpret_cast<char *>(canonical_abi_realloc(NULL, 0, 1, ret->len));/g' src/extension.cpp
+	sed 's/ret->ptr = canonical_abi_realloc(NULL, 0, 1, ret->len);/ret->ptr = reinterpret_cast<char *>(canonical_abi_realloc(NULL, 0, 1, ret->len));/g' src/extension.cpp > src/extension.cpp.tmp && mv src/extension.cpp.tmp src/extension.cpp
 
 clean:
 	rm -f build/extension.wasm
