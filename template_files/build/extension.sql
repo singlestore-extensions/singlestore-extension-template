@@ -1,0 +1,4 @@
+CREATE FUNCTION power_of
+AS WASM FROM LOCAL INFILE "extension.wasm"
+WITH WIT FROM LOCAL INFILE "extension.wit"
+USING EXPORT 'power-of';
