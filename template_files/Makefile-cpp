@@ -4,6 +4,7 @@ WASM_FLAGS = --target=wasm32-unknown-wasi -mexec-model=reactor -fno-exceptions
 LDFLAGS = -Wl,--no-entry -Wl,--export-all
 WIT_BINDGEN = wit-bindgen
 SED = sed
+NAME = $PROJECT_NAME
 
 .PHONY: all clean debug release gen
 
@@ -22,8 +23,10 @@ gen:
 	$(WIT_BINDGEN) c -e build/extension.wit --out-dir src/
 	mv src/extension.c src/extension.cpp
 	sed 's/ret->ptr = canonical_abi_realloc(NULL, 0, 1, ret->len);/ret->ptr = reinterpret_cast<char *>(canonical_abi_realloc(NULL, 0, 1, ret->len));/g' src/extension.cpp > src/extension.cpp.tmp && mv src/extension.cpp.tmp src/extension.cpp
+	tar cvf build/$PROJECT_NAME.tar build/*
 
 clean:
+	rm -f build/$PROJECT_NAME.tar
 	rm -f build/extension.wasm
 	rm -f src/extension.cpp
 	rm -f src/extension.h

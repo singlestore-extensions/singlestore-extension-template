@@ -43,6 +43,7 @@ sed_replace() {
 case "$LANGUAGE" in
     cpp)
         cp ./template_files/Makefile-cpp "$TARGET_FOLDER/Makefile"
+        sed_replace "s/\$PROJECT_NAME/$PROJECT_NAME/g" "$TARGET_FOLDER/Makefile"
         cp ./template_files/src/extension_impl.cpp "$TARGET_FOLDER/src/"
         ;;
     c)
