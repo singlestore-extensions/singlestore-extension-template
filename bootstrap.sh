@@ -26,7 +26,7 @@ mkdir -p "$TARGET_FOLDER"/src
 
 # Copy the specified files to the target folder
 cp ./template_files/LICENSE.md ./template_files/README.md ./template_files/CODE_OF_CONDUCT.md "$TARGET_FOLDER/"
-cp ./template_files/extension.wit "$TARGET_FOLDER/build/"
+cp ./template_files/build/extension.wit "$TARGET_FOLDER/build/"
 
 # Function to perform sed replacement
 sed_replace() {

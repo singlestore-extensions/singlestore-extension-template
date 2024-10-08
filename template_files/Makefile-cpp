@@ -1,23 +1,29 @@
 CXX = clang++
-CXXFLAGS = -msimd128 -I. -std=c++17
+CXXFLAGS = -msimd128 -I. -Isrc -std=c++17
 WASM_FLAGS = --target=wasm32-unknown-wasi -mexec-model=reactor -fno-exceptions
 LDFLAGS = -Wl,--no-entry -Wl,--export-all
 WIT_BINDGEN = wit-bindgen
+SED = sed
 
-.PHONY: all clean
+.PHONY: all clean debug release gen
 
-debug: CXXFLAGS += -g -v
-debug: all
+all: extension.wasm
 
-release: all
+debug: CXXFLAGS += -g -O0
+debug: extension.wasm
 
-extension.wasm: gen extension_impl.cpp extension.cpp
-	$(CXX) $(CXXFLAGS) $(WASM_FLAGS) $(LDFLAGS) -o build/extension.wasm extension_impl.cpp extension.cpp
+release: CXXFLAGS += -O3
+release: extension.wasm
 
-.PHONY: gen
+extension.wasm: gen src/extension_impl.cpp src/extension.cpp
+	$(CXX) $(CXXFLAGS) $(WASM_FLAGS) $(LDFLAGS) -o build/extension.wasm src/extension_impl.cpp src/extension.cpp
+
 gen:
 	$(WIT_BINDGEN) c -e build/extension.wit --out-dir src/
+	mv src/extension.c src/extension.cpp
+	$(SED) -i 's/ret->ptr = canonical_abi_realloc(NULL, 0, 1, ret->len);/ret->ptr = reinterpret_cast<char *>(canonical_abi_realloc(NULL, 0, 1, ret->len));/g' src/extension.cpp
 
-.PHONY: clean
 clean:
 	rm -f build/extension.wasm
+	rm -f src/extension.cpp
+	rm -f src/extension.h
