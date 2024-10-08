@@ -1,0 +1,25 @@
+.PHONY: all clean
+
+all: extension.wasm
+
+debug: DBGFLAGS += -g
+debug: all
+
+release: all
+
+extension.wasm: gen 
+		clang                           \
+	    $(DBGFLAGS)                     \
+	    --target=wasm32-unknown-wasi    \
+	    -mexec-model=reactor            \
+	    -I.                             \
+	    -o build/extension.wasm			\
+	    src/extension_impl.c src/extension.c
+
+.PHONY: gen
+gen:
+	$(WIT_BINDGEN) c -e build/extension.wit --out-dir src/
+
+.PHONY: clean
+clean:
+	rm -f build/extension.wasm

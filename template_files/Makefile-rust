@@ -1,0 +1,24 @@
+MODULE := extension
+
+.PHONY: debug
+debug: $(eval TGT:=debug)
+debug: wasm
+
+.PHONY: release
+release: $(eval TGT:=release)
+release: RELFLAGS = --release
+release: wasm
+
+.PHONY: wasm
+wasm:
+	cargo wasi build --lib $(RELFLAGS)
+
+.PHONY: test
+test: debug
+	writ \
+		--wit ./build/$(MODULE).wit --expect 8 target/wasm32-wasi/debug/$(MODULE).wasm power-of 2 3
+	@echo PASS
+
+.PHONY: clean
+clean:
+	@cargo clean

@@ -1,0 +1,23 @@
+CXX = clang++
+CXXFLAGS = -msimd128 -I. -std=c++17
+WASM_FLAGS = --target=wasm32-unknown-wasi -mexec-model=reactor -fno-exceptions
+LDFLAGS = -Wl,--no-entry -Wl,--export-all
+WIT_BINDGEN = wit-bindgen
+
+.PHONY: all clean
+
+debug: CXXFLAGS += -g -v
+debug: all
+
+release: all
+
+extension.wasm: gen extension_impl.cpp extension.cpp
+	$(CXX) $(CXXFLAGS) $(WASM_FLAGS) $(LDFLAGS) -o build/extension.wasm extension_impl.cpp extension.cpp
+
+.PHONY: gen
+gen:
+	$(WIT_BINDGEN) c -e build/extension.wit --out-dir src/
+
+.PHONY: clean
+clean:
+	rm -f build/extension.wasm
