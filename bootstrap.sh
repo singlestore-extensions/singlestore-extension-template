@@ -61,7 +61,7 @@ sed_replace "s/\$YEAR/$YEAR/g" "$TARGET_FOLDER/LICENSE.md"
 sed_replace "s/\$COMPANY/$COMPANY/g" "$TARGET_FOLDER/LICENSE.md"
 
 # Update the README.md file with the project name
-sed_replace "s/# Project Name/# $PROJECT_NAME/g" "$TARGET_FOLDER/README_template.md"
+sed_replace "s/\$Project/$PROJECT_NAME/g" "$TARGET_FOLDER/README.md"
 
 echo "Files copied and updated successfully in $TARGET_FOLDER"
 echo "Language selected: $LANGUAGE"
