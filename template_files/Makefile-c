@@ -1,25 +1,61 @@
-.PHONY: all clean
+# Compiler and flags
+CC = clang
+CFLAGS = -msimd128 -I. -Isrc -std=c11
+WASM_FLAGS = --target=wasm32-unknown-wasi -mexec-model=reactor -fno-exceptions
+LDFLAGS = -Wl,--no-entry -Wl,--export-all
 
-all: extension.wasm
+# Tools
+WIT_BINDGEN = wit-bindgen
+SED = sed
 
-debug: DBGFLAGS += -g
-debug: all
+# Project name
+NAME = $PROJECT_NAME
 
-release: all
+# Directories
+BUILD_DIR = build
+SRC_DIR = src
 
-extension.wasm: gen 
-		clang                           \
-	    $(DBGFLAGS)                     \
-	    --target=wasm32-unknown-wasi    \
-	    -mexec-model=reactor            \
-	    -I.                             \
-	    -o build/extension.wasm			\
-	    src/extension_impl.c src/extension.c
+# Files
+WASM_FILE = $(BUILD_DIR)/extension.wasm
+TAR_FILE = $(BUILD_DIR)/$(NAME).tar
+WIT_FILE = $(BUILD_DIR)/extension.wit
+C_FILES = $(SRC_DIR)/extension_impl.c $(SRC_DIR)/extension.c
 
-.PHONY: gen
+# Phony targets
+.PHONY: all clean debug release gen test
+
+# Default target
+all: $(WASM_FILE)
+
+# Debug build
+debug: CFLAGS += -g -O0
+debug: $(WASM_FILE)
+
+# Release build
+release: CFLAGS += -O3
+release: $(WASM_FILE)
+
+# Build the WebAssembly module
+$(WASM_FILE): gen $(C_FILES)
+	$(CC) $(CFLAGS) $(WASM_FLAGS) $(LDFLAGS) -o $@ $(C_FILES)
+	tar cvf $(TAR_FILE) -C $(BUILD_DIR) $(NAME).sql extension.wasm extension.wit 
+
+# Generate bindings
 gen:
-	$(WIT_BINDGEN) c -e build/extension.wit --out-dir src/
+	$(WIT_BINDGEN) c -e $(WIT_FILE) --out-dir $(SRC_DIR)/
 
-.PHONY: clean
+# Clean build artifacts
 clean:
-	rm -f build/extension.wasm
+	rm -f $(TAR_FILE)
+	rm -f $(WASM_FILE)
+	rm -f $(SRC_DIR)/extension.c
+	rm -f $(SRC_DIR)/extension.h
+
+# Run tests
+test: debug
+	writ --expect 8 --wit $(WIT_FILE) $(WASM_FILE) $(NAME) 2 3
+	@echo PASS
+	writ --expect 1 --wit $(WIT_FILE) $(WASM_FILE) $(NAME) 2 0
+	@echo PASS
+	writ --expect 0 --wit $(WIT_FILE) $(WASM_FILE) $(NAME) 0 2
+	@echo PASS
