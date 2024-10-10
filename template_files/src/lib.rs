@@ -1,4 +1,4 @@
-wit_bindgen_rust::export!("extension.wit");
+wit_bindgen_rust::export!("build/extension.wit");
 
 struct Extension;
 

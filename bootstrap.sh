@@ -44,7 +44,6 @@ sed_replace() {
 case "$LANGUAGE" in
     cpp)
         cp ./template_files/Makefile-cpp "$TARGET_FOLDER/Makefile"
-        sed_replace "s/\$PROJECT_NAME/$PROJECT_NAME/g" "$TARGET_FOLDER/Makefile"
         cp ./template_files/src/extension_impl.cpp "$TARGET_FOLDER/src/"
         ;;
     c)
@@ -64,6 +63,9 @@ sed_replace "s/\$COMPANY/$COMPANY/g" "$TARGET_FOLDER/LICENSE.md"
 
 # Update the README.md file with the project name
 sed_replace "s/\$Project/$PROJECT_NAME/g" "$TARGET_FOLDER/README.md"
+
+# Update the Makefile file with the project name
+sed_replace "s/\$PROJECT_NAME/$PROJECT_NAME/g" "$TARGET_FOLDER/Makefile"
 
 echo "Files copied and updated successfully in $TARGET_FOLDER"
 echo "Language selected: $LANGUAGE"
