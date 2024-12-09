@@ -5,6 +5,7 @@ This repository automates the process of setting up a new project directory with
 
 ## Features
 
+- **The bootstrapping will create a simple working example of the power-of UDF deployed as an extension**
 - Creates a new project directory with subdirectories
 - Copies template files to the new project directory
 - Customizes files with project-specific information
