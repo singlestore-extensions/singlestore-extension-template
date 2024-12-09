@@ -7,6 +7,7 @@ LDFLAGS = -Wl,--no-entry -Wl,--export-all
 # Tools
 WIT_BINDGEN = wit-bindgen
 SED = sed
+BASE64 = base64
 
 # Project name
 NAME = $PROJECT_NAME
@@ -20,6 +21,7 @@ WASM_FILE = $(BUILD_DIR)/extension.wasm
 TAR_FILE = $(BUILD_DIR)/$(NAME).tar
 WIT_FILE = $(BUILD_DIR)/extension.wit
 CPP_FILES = $(SRC_DIR)/extension_impl.cpp $(SRC_DIR)/extension.cpp
+LOAD_SQL_FILE = $(BUILD_DIR)/load_extension.sql
 
 # Phony targets
 .PHONY: all clean debug release gen test
@@ -38,7 +40,13 @@ release: $(WASM_FILE)
 # Build the WebAssembly module
 $(WASM_FILE): gen $(CPP_FILES)
 	$(CXX) $(CXXFLAGS) $(WASM_FLAGS) $(LDFLAGS) -o $@ $(CPP_FILES)
-	tar cvf $(TAR_FILE) -C $(BUILD_DIR) $(NAME).sql extension.wasm extension.wit 
+	tar cvf $(TAR_FILE) -C $(BUILD_DIR) $(NAME).sql extension.wasm extension.wit
+	$(BASE64) $(WASM_FILE) > $(BUILD_DIR)/wasm_b64.txt
+	$(BASE64) $(WIT_FILE) > $(BUILD_DIR)/wit_b64.txt
+	sed 's/USING EXPORT '\''$(NAME)'\'';//' $(BUILD_DIR)/$(NAME).sql | \
+	sed 's/AS WASM FROM LOCAL INFILE "extension.wasm"/AS WASM FROM BASE64 '\''$$(cat $(BUILD_DIR)/wasm_b64.txt)'\''/' | \
+	sed 's/WITH WIT FROM LOCAL INFILE "extension.wit"/WITH WIT FROM BASE64 '\''$$(cat $(BUILD_DIR)/wit_b64.txt)'\''/' \
+	> $(LOAD_SQL_FILE)
 
 # Generate bindings
 gen:
@@ -52,6 +60,9 @@ clean:
 	rm -f $(WASM_FILE)
 	rm -f $(SRC_DIR)/extension.cpp
 	rm -f $(SRC_DIR)/extension.h
+	rm -f $(BUILD_DIR)/wasm_b64.txt
+	rm -f $(BUILD_DIR)/wit_b64.txt
+	rm -f $(LOAD_SQL_FILE)
 
 # Run tests
 test: debug
