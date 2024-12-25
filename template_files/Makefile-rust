@@ -7,8 +7,8 @@ NAME = $PROJECT_NAME
 # Directories
 BUILD_DIR = build
 SRC_DIR = src
-DEBUG_PATH = target/wasm32-wasi/debug
-RELEASE_PATH = target/wasm32-wasi/release
+DEBUG_PATH = target/wasm32-wasip1/debug
+RELEASE_PATH = target/wasm32-wasip1/release
 
 # Files
 WASM_RELEASE_FILE = $(RELEASE_PATH)/extension.wasm
@@ -31,10 +31,10 @@ release: $(WASM_RELEASE_FILE)
 
 # Build the WebAssembly module
 $(WASM_DEBUG_FILE):
-	cargo build --target wasm32-wasi
+	cargo build --target wasm32-wasip1
 
 $(WASM_RELEASE_FILE):
-	cargo build --target wasm32-wasi --release
+	cargo build --target wasm32-wasip1 --release
 
 # Clean build artifacts
 clean:
